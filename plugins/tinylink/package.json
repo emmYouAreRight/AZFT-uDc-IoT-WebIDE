@@ -1,0 +1,35 @@
+{
+  "name": "tinylink",
+  "publisher": "theia",
+  "keywords": [
+    "theia-plugin"
+  ],
+  "version": "0.0.1",
+  "license": "none",
+  "files": [
+    "src"
+  ],
+  "devDependencies": {
+    "@theia/plugin": "latest",
+    "@theia/plugin-packager": "latest",
+    "rimraf": "2.6.2",
+    "typescript": "2.9.2",
+    "ts-loader": "^4.1.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^3.1.1"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "watch": "webpack-cli -w --config webpack.config.js",
+    "compile": "webpack-cli --config webpack.config.js",
+    "build": "yarn run compile && theia:plugin pack"
+  },
+  "engines": {
+    "theiaPlugin": "latest"
+  },
+  "theiaPlugin": {
+    "frontend": "dist/tinylink-frontend.js"
+  }
+}
