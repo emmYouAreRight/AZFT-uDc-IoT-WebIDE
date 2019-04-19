@@ -10,6 +10,7 @@
   ],
   "dependencies": {
     "@theia/core": "latest",
+    "axios": "^0.18.0",
     "describe": "^1.2.0"
   },
   "devDependencies": {
@@ -19,7 +20,7 @@
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
-    "build": "tsc",
+    "build": "tsc  --jsx react",
     "watch": "tsc -w"
   },
   "theiaExtensions": [

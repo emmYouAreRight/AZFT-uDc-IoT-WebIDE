@@ -2,13 +2,21 @@
     "compilerOptions": {
         "strict": true,
         "skipLibCheck": true,
+        "declaration": true,
         "experimentalDecorators": true,
         "noUnusedLocals": true,
         "emitDecoratorMetadata": true,
         "downlevelIteration": true,
+        "declarationMap": true,
+        "noImplicitAny": true,
+        "noEmitOnError": false,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "resolveJsonModule": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "target": "es5",
+        "jsx": "react",
         "lib": [
             "es6",
             "dom"

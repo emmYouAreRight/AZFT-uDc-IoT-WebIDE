@@ -1,3 +1,4 @@
+import { LOGINTYPE } from './../common/udc-service';
 import { UdcClient } from './../common/udc-watcher';
 import { UdcTerminal } from './udc-terminal';
 import { UdcService } from './../common/udc-service';
@@ -5,59 +6,77 @@ import { injectable, inject } from "inversify";
 import { ILogger } from '@theia/core';
 import { RawProcessFactory } from '@theia/process/lib/node';
 
-
 @injectable()
 export class UdcServiceImpl implements UdcService {
-    mysecret: string;
-    
     constructor(
         @inject(ILogger) protected readonly logger: ILogger,
         @inject(RawProcessFactory) protected readonly rawProcessFactory: RawProcessFactory,
-        @inject(UdcTerminal) protected readonly udcTermianl: UdcTerminal,
+        @inject(UdcTerminal) protected readonly udcTerminal: UdcTerminal,
     ) {
-        this.mysecret = 'yahaha';
-    }
-    async test(value: string) {
-        return value;
-    }
-    async connect(value: string): Promise<string> {
-        let result = await this.udcTermianl.connect();
-        return new Promise<string>(function (resolve, reject) {
-            if (result) {
-                resolve('connect to server succeeded')
-            } else {
-                reject('connect ot server failed , please retry')
-            }
-        })
-    }
-
-    get_devices(): Promise<{ [key: string]: number }> {
-        return new Promise<{ [key: string]: number }>((resolve, reject) => {
-            let re = this.udcTermianl.get_devlist();
-            let flag = false;
-            for (let _k in re) {
-                flag = true;
-                break;
-            }
-            if (flag) {
-                resolve(re)
-            } else {
-                reject("Empty dev list")
-            }
-        }
-        )
-    }
-
-    program(filepath: string,devstr:string): Promise<Boolean> {
-        return new Promise<Boolean>((resolve, rejects) => {
-            // console.log(filepath, " ", devstr);
-            let result=this.udcTermianl.program_devices(filepath,devstr);
-            resolve(result);
-        }
-        );
     }
     
-    setClient(client:UdcClient){
-        this.udcTermianl.setClient(client);
+    is_connected(): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, rejects) => {
+            resolve(this.udcTerminal.is_connected);
+        });
     }
+
+    async connect(login_type: LOGINTYPE, model: string): Promise<string> {
+        try {
+            let result = await this.udcTerminal.connect(login_type, model);
+            if (result === true) {
+                return "连接成功"
+            } else {
+                return "连接失败";
+            }
+        } catch (e) {
+            return e;
+        }
+    }
+
+    async disconnect(): Promise<string> {
+        let result = await this.udcTerminal.disconnect();
+        return (result === true ? 'Disconnect succeed' : 'Disconnect failed')
+    }
+
+    
+    async list_models(): Promise<Array<string>> {
+        return new Promise<Array<string>>((resolve, rejects) => {
+            let result = this.udcTerminal.list_models();
+            resolve(result);
+        });
+    }
+
+    get_devices(): Promise<{[key: string]: number}|undefined> {
+            let re = this.udcTerminal.get_devlist();
+            return new Promise((resolve,reject)=>{
+                resolve(re)
+            }) 
+    }
+
+    program(filepath: string, address:string, devstr: string): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, rejects) => {
+            // console.log(filepath, " ", devstr);
+            let result = this.udcTerminal.program_device(filepath, address, devstr);
+            resolve(result);
+        });
+    }
+
+    rumcmd(devstr: string, cmdstr: string): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, rejects) => {
+            let result = this.udcTerminal.run_command(devstr, cmdstr);
+            resolve(result);
+        });
+    }
+
+    control(devstr: string, operation: string): Promise<Boolean> {
+        return new Promise<Boolean>((resolve, rejects) => {
+            let result = this.udcTerminal.control_device(devstr, operation);
+            resolve(result);
+        });
+    }
+
+    setClient(client: UdcClient) {
+        this.udcTerminal.setClient(client);
+    } 
 }

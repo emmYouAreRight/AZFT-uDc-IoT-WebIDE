@@ -1,64 +1,44 @@
+import { certificate } from './../common/udc-config';
 import { UdcClient } from './../common/udc-watcher';
 import { injectable, inject } from "inversify";
 import * as tls from 'tls';
 import * as fs from 'fs-extra';
 import { Packet } from "./packet";
 import * as events from "events";
-
+import https = require('https');
 
 import { networkInterfaces } from 'os';
+import { LOGINTYPE } from '../common/udc-service';
 
 @injectable()
 export class UdcTerminal {
     udcserver: any;
     DEFAULT_SERVER: string = "118.31.76.36";
     DEFAULT_PORT: number = 2000;
-    catification = "-----BEGIN CERTIFICATE-----\
-    MIIDqzCCApOgAwIBAgIJAOTVKkX6qd8LMA0GCSqGSIb3DQEBCwUAMGwxCzAJBgNV\
-    BAYTAkNOMREwDwYDVQQIDAhaaGVqaWFuZzERMA8GA1UEBwwISGFuZ3pob3UxFjAU\
-    BgNVBAoMDUFsaWJhYmEgQ2xvdWQxDDAKBgNVBAsMA0lvVDERMA8GA1UEAwwIdWRj\
-    ZW50ZXIwHhcNMTgwMTIzMDgwMDE3WhcNMTkwMTIzMDgwMDE3WjBsMQswCQYDVQQG\
-    EwJDTjERMA8GA1UECAwIWmhlamlhbmcxETAPBgNVBAcMCEhhbmd6aG91MRYwFAYD\
-    VQQKDA1BbGliYWJhIENsb3VkMQwwCgYDVQQLDANJb1QxETAPBgNVBAMMCHVkY2Vu\
-    dGVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx6r8YZJkAWFK2oj6\
-    wQVR/tf3+CXLWTnzNQrV/kJLPo1HmvxE5HmVyToQFVv2RxBFF4fUZO1RZwEgiSnV\
-    ZEbkuOHkZQ+3hG81VSsARhm8EwUIRgcSzEPLFJjozESHdyk80t1Stzs84WhK4x+x\
-    Sdpm5GrlUShZ7zxiK41nM+21hQr0cRAY/zh6DeYIfcZzAlHPwuE9GTudNIVkP437\
-    kcQsvY3ihJB1EKI6fQYwdEOlMIDcEhHbgIPMTup88G6J+5/Ma7ueA+HlBpBRN/aN\
-    rQW8dsEfi8FTsyI9xqCPQctPPFVOy4s/wTdXieK1fdyfaA+7qzfOVAPpoAACcRlv\
-    2frKaQIDAQABo1AwTjAdBgNVHQ4EFgQU12lL8lUzpmGCGDbEYfWJd1U0T7gwHwYD\
-    VR0jBBgwFoAU12lL8lUzpmGCGDbEYfWJd1U0T7gwDAYDVR0TBAUwAwEB/zANBgkq\
-    hkiG9w0BAQsFAAOCAQEAcz1zZFBSAfz60g7aQdxNIb+y2jWV0gC04K1gLbeOLv0G\
-    1uNby28a35CJESEPprA7B5JNgzNBvA0tBdwGlTcsDtAzQOdjdnhsK/Oqr78sYBf8\
-    ncRIiE+Bs1/LnPBsjksWuM8QGGM+YUVOHaAxNMc7sE5cYCZY/SjWScerAjANVA9E\
-    IsSdEkoF7+QL4nk0QZF4Y8p1iLCBo7i9xLS0qFr9rEmUblhgA0NEFRn9O+ijxVrD\
-    QIS3CmcdAzFtnS9SNzuvFhRJTyfQZTwmbD598g7ZsPCJ111L/X+Pj5AAmr8F/AeN\
-    w1HmLfnaQnRiOP2O/pul+QL1GnctQFE2Bslz9Dd+mw==\
-    -----END CERTIFICATE-----\
-    "
-    udcControlerClient: any
-    model : string = "tinylink_lora"
-    dev_list: { [key: string]: number } = {}
+
+    udcControlerClient: any = null;
+    model: string = "esp8266";
+    login_type: LOGINTYPE = LOGINTYPE.ADHOC
+    dev_list?: { [key: string]: number } 
     cmd_excute_state = "idle"
     cmd_excute_return: any = ""
-    
-    udcServerClient: any
-
-    udcClient:UdcClient|undefined =undefined
-
+    udcServerClient: any = null
+    udcClient?: UdcClient
+    events = new events.EventEmitter();
     event: any
+
     constructor(
         @inject(Packet) protected readonly pkt: Packet,
     ) {
         this.event = new events.EventEmitter();
     }
 
-    setClient(client:UdcClient){
-        this.udcClient=client;
+    setClient(client: UdcClient) {
+        this.udcClient = client;
     }
 
     get uuid(): string {
-        let uuid : string = '';
+        let uuid: string = '';
         let interfaces = networkInterfaces();
         for (let intf in interfaces) {
             for (let i in interfaces[intf]) {
@@ -71,39 +51,48 @@ export class UdcTerminal {
         return uuid;
     }
 
-    login_and_get_server(): Promise<Array<any>> {
+
+    login_and_get_server(login_type: LOGINTYPE, model: string): Promise<Array<any>> {
+        this.model = model;
+        this.login_type = login_type;
+
+        const data = JSON.stringify({
+            uuid: login_type === LOGINTYPE.ADHOC ? this.uuid : model,
+            type: login_type,
+            model: login_type === LOGINTYPE.ADHOC ? model : "any",
+        })
+
         let options = {
-            ca: this.catification,
+            host: '118.31.76.36',
+            port: 8080,
+            path: '/terminal/login',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': data.length,
+            },
+            cert: certificate,
             rejectUnauthorized: false,
-            requestCert: false
         }
 
-        this.udcControlerClient = tls.connect(this.DEFAULT_PORT, this.DEFAULT_SERVER, options, () => {
-            console.log('connected to controller');
-            let send = this.pkt.construct(Packet.ACCESS_LOGIN,
-                ['terminal', this.uuid, 'adhoc', this.model].join());
-            this.udcControlerClient.write(send)
-        });
-        this.udcControlerClient.on('close', () => {
-            console.log('uDC controller connection closed!')
-        })
-        this.udcControlerClient.on('error', (err: any) => {
-            console.log(err);
-        })
-
-        let _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.udcControlerClient.on('data', (data: any) => {
-                //连接到controller ，获得ca
-                let [type, length, value, msg] = _this.pkt.parse(data.toString('ascii'));
-                let rets = value.split(',');
-                if (type != Packet.ACCESS_LOGIN || rets[0] != 'success') {
-                    console.log('Recevied: ', type, length, value, msg);
-                    reject(data.toString('ascii'));
-                } else {
-                    resolve(rets);
-                }
-            })
+        return new Promise((resolve, reject) => {
+            let req = https.request(options, function (res) {
+                res.on('data', (d: Buffer) => {
+                    let result = JSON.parse(d.toString('ascii'));
+                    if (result.result === "success") {
+                        let ret = [result.result, result.host, result.port, result.token, result.certificate]
+                        resolve(ret)
+                    } else {
+                        reject(result.message)
+                    }
+                })
+                res.on('error', (err) => {
+                    console.log(err);
+                    reject('api call failed')
+                })
+            });
+            req.write(data);
+            req.end();
         })
     }
 
@@ -137,7 +126,6 @@ export class UdcTerminal {
     onUdcServerData = (data: Buffer) => {
         // let [type, length, value, msg] = this.pkt.parse(data.toString('ascii'));
         let [type, , value] = this.pkt.parse(data.toString('ascii'));
-
         // console.log(`Received: type=${type} length=${length} value= ${value} msg=${msg}`);
 
         if (type === Packet.ALL_DEV) {
@@ -156,68 +144,134 @@ export class UdcTerminal {
             }
             this.dev_list = new_dev_list;
 
-        } else if (type === Packet.DEVICE_STATUS) {
+            if(this.udcClient){
+                this.udcClient.onDeviceList(new_dev_list)
+            }
 
+        } else if (type === Packet.DEVICE_STATUS) {
         } else if (type === Packet.TERMINAL_LOGIN) {
             if (value === 'success') {
                 console.log('server login success');
             } else {
                 console.log('login failed retrying ...');
-                this.connect()
+                this.connect(this.login_type, this.model)
             }
-        } else if (type === Packet.CMD_DONE) {
-            console.log("done");
+        } else if (type === Packet.CMD_DONE || type === Packet.CMD_ERROR) {
+            console.log(data.toString('ascii'));
             this.cmd_excute_return = value;
-            this.cmd_excute_state = "done";
-
-        } else if (type === Packet.CMD_ERROR) {
-            console.log('error' + data.toString('ascii'));
-            this.cmd_excute_state = "error";
-            this.cmd_excute_return = value;
+            this.cmd_excute_state = (type === Packet.CMD_DONE ? 'done' : 'error');
+            this.events.emit('cmd-response');
         } else if (type == Packet.DEVICE_LOG) {
-           if(this.udcClient){
-               this.udcClient.OnDeviceLog(data.toString("ascii"))
-           }
+            if (this.udcClient) {
+                this.udcClient.OnDeviceLog(value)
+            }
         }
+        this.udcServerClient.write(this.pkt.construct(Packet.HEARTBEAT, ""));
     }
 
-    erase_device(dev_str: string) {
-        this.send_packet(Packet.DEVICE_ERASE, dev_str)
+    async list_models(): Promise<Array<string>> {
+        let default_devices = ['aiotkit',
+            'developerkit',
+            'esp32',
+            'esp8266',
+            'mk3060',
+            'stm32l432kc',
+            'tinylink_platform_1',
+            'tinylink_lora',
+            'tinylink_raspi'];
+
+        let options = {
+            host: '118.31.76.36',
+            port: 8080,
+            path: '/list/models',
+            method: 'GET',
+            cert: certificate,
+            rejectUnauthorized: false
+        }
+
+        return new Promise((resolve, reject) => {
+            https.request(options, function (res) {
+                res.on('data', (d: Buffer) => {
+                    let result = JSON.parse(d.toString('ascii'));
+                    if (result.result === "success" && result.models != null) {
+                        resolve(result.models)
+                    } else {
+                        resolve(default_devices)
+                    }
+                })
+
+                res.on('error', (err) => {
+                    console.log(err);
+                    resolve(default_devices)
+                })
+            }).end();
+        })
     }
 
-    async program_devices(filepath: string, devstr: string): Promise<Boolean> {
+    get is_connected(): Boolean {
+        return (this.udcServerClient != null);
+    }
+
+    async connect(login_type: LOGINTYPE, model: string): Promise<Boolean | string> {
+        let rets = await this.login_and_get_server(login_type, model);
+        if (rets === []) { return false; }
+        let [re, server_ip, server_port, token, certificate] = rets;
+        if (re != 'success') { return false; }
+        let result = await this.connect_to_server(server_ip, server_port, certificate);
+        if (result !== 'success') return false;
+        this.send_packet(Packet.packet_type.TERMINAL_LOGIN, `${this.login_type === LOGINTYPE.FIXED ? this.model : this.uuid},${token}`)
+        return true;
+    }
+
+    async disconnect(): Promise<Boolean> {
+        if (this.udcServerClient === null) {
+            return true;
+        }
+        this.udcServerClient.destroy();
+        this.udcServerClient = null;
+        this.dev_list = undefined
+        return true;
+    }
+
+    async erase_device(dev_str: string) {
+        this.send_packet(Packet.DEVICE_ERASE, dev_str);
+        await this.wait_cmd_excute_done(120000);
+        return (this.cmd_excute_state === 'done' ? true : false);
+    }
+
+    async program_device(filepath: string, address: string, devstr: string): Promise<Boolean> {
         let send_result = await this.send_file_to_client(filepath, devstr);
         if (send_result === false) {
             return false;
         }
 
-        let content = `${devstr},0x40000,${await this.pkt.hash_of_file(filepath)}`
-        console.log(content);
+        let content = `${devstr},${address},${await this.pkt.hash_of_file(filepath)}`
+        // console.log(content);
         this.send_packet(Packet.DEVICE_PROGRAM, content);
-        await this.wait_cmd_excute_done(2700);
-        if (this.cmd_excute_state === 'done') {
-            return true;
-        } else {
-            return false;
-        }
+        await this.wait_cmd_excute_done(270000);
+        return (this.cmd_excute_state === 'done' ? true : false);
     }
 
-    async connect(): Promise<Boolean> {
-        try {
-            let rets = await this.login_and_get_server();
-            if (rets === []) { return false; }
-            let [re, server_ip, server_port, token, certifacate] = rets;
-            if (re != 'success') { return false; }
-            let result = await this.connect_to_server(server_ip, server_port, certifacate);
-            if (result !== 'success') return false;
-            this.send_packet(Packet.packet_type.TERMINAL_LOGIN, `${this.uuid},${token}`)
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
+    async run_command(devstr: string, args: string) {
+        let content = `${devstr}:${args.replace(' ', '|')}`
+        this.send_packet(Packet.DEVICE_CMD, content);
+        await this.wait_cmd_excute_done(1500);
+        return (this.cmd_excute_state === 'done' ? true : false);
     }
 
+    async control_device(devstr: string, operation: string): Promise<Boolean> {
+        let operations: { [key: string]: string } = {
+            'start': Packet.DEVICE_START,
+            'stop': Packet.DEVICE_STOP,
+            'reset': Packet.DEVICE_RESET,
+        }
+        if (operations.hasOwnProperty(operation) === false) {
+            return false;
+        }
+        this.send_packet(operations[operation], devstr);
+        await this.wait_cmd_excute_done(10000);
+        return (this.cmd_excute_state === 'done' ? true : false);
+    }
 
     async send_file_to_client(filepath: string, devstr: string): Promise<Boolean> {
         let filehash = await this.pkt.hash_of_file(filepath);
@@ -295,22 +349,29 @@ export class UdcTerminal {
         if (retry === 0) {
             return false
         }
-
         return true;
     }
 
-    send_packet(type: string, content: string){
-        this.udcServerClient.write(this.pkt.construct(type, content))
+    send_packet(type: string, content: string) {
+        this.udcServerClient.write(this.pkt.construct(Packet.HEARTBEAT, ""));
+        this.udcServerClient.write(this.pkt.construct(type, content));
     }
 
-    async wait_cmd_excute_done(time: number) {
+    async wait_cmd_excute_done(timeout: number) {
         this.cmd_excute_state = 'wait_response';
         this.cmd_excute_return = null;
-        return new Promise(res => setTimeout(res, time));
-    }
-
-    get_devstr_by_index() {
-
+        return new Promise((resolve, reject) => {
+            let cmd_timeout = setTimeout(() => {
+                this.cmd_excute_state = 'timeout';
+                this.events.removeAllListeners('cmd-response');
+                resolve();
+            }, timeout);
+            this.events.once('cmd-response', () => {
+                clearTimeout(cmd_timeout);
+                this.events.removeAllListeners('cmd-response');
+                resolve();
+            });
+        });
     }
 
     get_devlist() {

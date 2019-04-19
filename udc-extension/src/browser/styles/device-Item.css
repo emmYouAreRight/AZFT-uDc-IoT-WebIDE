@@ -1,0 +1,32 @@
+.deviceInfo span {
+    display: block
+}
+
+.deviceItem {
+    margin: 20px
+}
+
+#Device-Item-Container .buttons {
+    display: flex
+}
+
+#Device-Item-Container .buttons .toolbar-button {
+    margin: 0 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 3px 3px;
+    height: 16px;
+    width: 12px;
+    background: var(--theia-icon-open-file) no-repeat center center;
+}
+
+#Device-Item-Container .buttons .toolbar-button:hover {
+    background: var(--theia-content-font-color3);
+}
+
+#device-view-widget .deviceview-selection select {
+    width: -webkit-fill-available;
+    height: auto;
+    margin:0px, 20px
+}
