@@ -26,7 +26,8 @@
   "scripts": {
     "prepare": "theia build --mode development",
     "start": "theia start",
-    "watch": "theia build --watch --mode development"
+    "watch": "theia build --watch --mode development",
+	"build": "theia build"
   },
   "theia": {
     "target": "browser"
