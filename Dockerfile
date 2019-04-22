@@ -1,10 +1,11 @@
-ARG NODE_VERSION=10
+ARG NODE_VERSION=8
 FROM node:${NODE_VERSION}-alpine
 RUN apk add --no-cache make gcc g++ python bash
 WORKDIR /home/theia
 # 注意：plugin和 extension并不在docker中再次编译，故在docker build前一定注意要在本目录编译好plugin和 extension
 ADD ./ ./
-RUN yarn config set registry https://registry.npm.taobao.org/ &&\
+RUN yarn --pure-lockfile && \
+	yarn config set registry https://registry.npm.taobao.org/ &&\
     yarn --production && \
     yarn build && \
     yarn autoclean --init && \

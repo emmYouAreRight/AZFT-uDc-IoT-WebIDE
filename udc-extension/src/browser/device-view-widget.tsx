@@ -43,11 +43,14 @@ export class DeviceItem extends React.Component<DeviceItem.Props>{
             display: 'block'
         }
         return <div className={`deviceItem ${dev_str}`}>
+            <div className='deviceBody'>
+            <div className='avatar'><div className='avatarIcon'></div> </div>
             <div className='deviceInfo' style={blockdisplay}>
                 <span className='model_type' >model_type: {model_type}</span>
+                <span className='using_or_not'>status: {using_or_not}</span>
                 <span className='model_id'>model_id: {model_id}</span>
                 <span className='hub_id'>hub_id: {hub_id}</span>
-                <span className='using_or_not'>status: {using_or_not}</span>
+            </div>
             </div>
             <div className='itemButtonsContainer'>
                 {this.renderDeviceItemButtons()}
@@ -58,14 +61,15 @@ export class DeviceItem extends React.Component<DeviceItem.Props>{
     protected renderDeviceItemButtons(): React.ReactNode {
         return <div className='buttons'>
             <a className='toolbar-button' title='reset' onClick={() => this.reset()}>
-                <i className='open-file' />
+                reset
             </a>
+            <span> | </span>
             <a className='toolbar-button' title='program' onClick={() => this.program()}>
-                <i className='open-file' />
+                program
             </a>
-
+            <span> | </span>
             <a className='toolbar-button' title='shell' onClick={() => this.openshell()}>
-                <i className='theia-debug-console-icon' />
+                shell
                 {/* <div className='p-TabBar-tabIcon theia-debug-console-icon' /> */}
             </a>
         </div>
@@ -160,14 +164,15 @@ export class DeviceViewWidget extends TreeWidget {
             </div>
             <div id='Device-Item-Container'>{l}</div>
         </div>
+
     }
 
 
     protected renderConnectArea():React.ReactNode{
         if(this.device_list){
-            return  <button onClick={this.disconnect}>DisConnect</button>
+            return  <button className='btn disConnect' onClick={this.disconnect}>DisConnect</button>
         }else{
-            return  <button onClick={this.connect}>Connect</button>   
+            return  <button className='btn connect' onClick={this.connect}>Connect</button>   
         }
     }
 

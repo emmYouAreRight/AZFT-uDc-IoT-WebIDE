@@ -1,32 +1,66 @@
-.deviceInfo span {
+.deviceInfo span{
     display: block
 }
 
-.deviceItem {
-    margin: 20px
+.deviceBody{
+    display: flex;
+    border-bottom: 2px solid;
+    padding: 5px 0;
 }
 
-#Device-Item-Container .buttons {
-    display: flex
-}
-
-#Device-Item-Container .buttons .toolbar-button {
-    margin: 0 2px;
-    cursor: pointer;
+.deviceItem .avatar{
     display: flex;
     align-items: center;
-    padding: 3px 3px;
-    height: 16px;
-    width: 12px;
-    background: var(--theia-icon-open-file) no-repeat center center;
+    margin: 5px 16px;
 }
 
-#Device-Item-Container .buttons .toolbar-button:hover {
-    background: var(--theia-content-font-color3);
+.deviceItem .avatar .avatarIcon{
+    width: 48px;
+    height: 48px;
+    background: url(./image/baseline-desktop_windows-24px.svg) center center;
+    background-size: 100% 100%;
 }
+deviceInfo{
+    flex-shrink: 1;
+}
+.deviceItem{
+    margin: 20px;
+    padding: 5px;
+    border: 2px solid;
+    border-radius: 5px;
+}
+
+#Device-Item-Container .buttons{
+    display: flex
+}
+#Device-Item-Container .buttons{
+    padding: 4px;
+}
+
+#Device-Item-Container .buttons .toolbar-button{
+    margin: 0 4px;
+    cursor: pointer;
+    color: blue;
+}
+
+#Device-Item-Container .buttons .toolbar-button:hover{
+    text-decoration: underline;
+}
+
 
 #device-view-widget .deviceview-selection select {
     width: -webkit-fill-available;
     height: auto;
     margin:0px, 20px
 }
+
+.btn{
+    border-radius: 4px;
+    padding: 4px 12px;  
+    font-size: 12px;
+    background-color:#6698cb;
+}
+.btn:active{
+    background-color: #709CA8;
+}
+
