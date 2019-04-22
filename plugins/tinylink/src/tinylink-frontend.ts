@@ -28,11 +28,11 @@ namespace IoTCommands {
 
 namespace IoTURL {
     export const TINYLINK_LOCAL =
-        "http://tinylink.daixinye.com/webview/tinylink/localcompile";
+        "http://linklab.tinylink.cn/webview/tinylink/localcompile";
     export const TINYSIM =
-        "http://tinylink.daixinye.com/webview/tinysim"
+        "http://linklab.tinylink.cn/webview/tinysim"
     export const ONELINK = 
-        "http://tinylink.daixinye.com/webview/onelink"
+        "http://linklab.tinylink.cn/webview/onelink"
 
     export function getQueryParameterString() {
         const parameters = theia.env.getQueryParameters() || {};
