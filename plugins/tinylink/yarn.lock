@@ -14,10 +14,10 @@
     read-pkg "4.0.1"
     yargs "12.0.1"
 
-"@theia/plugin@next":
-  version "0.4.0-next.73d23a46"
-  resolved "http://registry.npm.taobao.org/@theia/plugin/download/@theia/plugin-0.4.0-next.73d23a46.tgz#c012aba89c89b033700911d7390653bd0a10f0d9"
-  integrity sha1-wBKrqJyJsDNwCRHXOQZTvQoQ8Nk=
+"@theia/plugin@latest":
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/@theia/plugin/-/plugin-0.16.1.tgz#f9302e432bada975bc680bd028af4158f006c91a"
+  integrity sha512-k7BHN03QkuRP/AhyAahHLIfiEi6TyEvzt7Jr4jQ9ma2L+En9D8RzMDMXfPKl+GOMUSYWEvVWsnTDjAlW99RMLA==
 
 "@types/events@*":
   version "1.2.0"
@@ -207,9 +207,9 @@ acorn-dynamic-import@^4.0.0:
   integrity sha1-SCIQFAWCo2uDw+NC4c/ryqkkCUg=
 
 acorn@^6.0.5:
-  version "6.0.5"
-  resolved "http://registry.npm.taobao.org/acorn/download/acorn-6.0.5.tgz#81730c0815f3f3b34d8efa95cb7430965f4d887a"
-  integrity sha1-gXMMCBXz87NNjvqVy3Qwll9NiHo=
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.1.tgz#531e58ba3f51b9dacb9a6646ca4debf5b14ca474"
+  integrity sha512-ZVA9k326Nwrj3Cj9jlh3wGFutC2ZornPNARZwsNYqQYgN0EsV2d53w5RN/co65Ohn4sUAUtb1rSUAOD6XN9idA==
 
 ajv-errors@^1.0.0:
   version "1.0.1"
