@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "@theia/core": "latest",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "describe": "^1.2.0"
   },
   "devDependencies": {
