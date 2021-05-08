@@ -14,10 +14,10 @@
     read-pkg "4.0.1"
     yargs "12.0.1"
 
-"@theia/plugin@next":
-  version "0.4.0-next.73d23a46"
-  resolved "http://registry.npm.taobao.org/@theia/plugin/download/@theia/plugin-0.4.0-next.73d23a46.tgz#c012aba89c89b033700911d7390653bd0a10f0d9"
-  integrity sha1-wBKrqJyJsDNwCRHXOQZTvQoQ8Nk=
+"@theia/plugin@latest":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@theia/plugin/-/plugin-1.13.0.tgz#91557a42ac355c9c98ef2386d18af6bdc35404b6"
+  integrity sha512-o+Ge8qIT8/xT3VUg2ZnSokaRmZFoINijdeki3EvcgiDergf3ss/W21CbQ1TMwkpmssfVkQspBOne4mQqZf/Wyg==
 
 "@types/events@*":
   version "1.2.0"
@@ -1761,9 +1761,9 @@ lodash.debounce@^4.0.8:
   integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
 
 lodash@^4.17.10, lodash@^4.8.0:
-  version "4.17.11"
-  resolved "http://registry.npm.taobao.org/lodash/download/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
-  integrity sha1-s56mIp72B+zYniyN8SU2iRysm40=
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 lru-cache@^4.0.1:
   version "4.1.5"
